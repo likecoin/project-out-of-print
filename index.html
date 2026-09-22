@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>絕版重生計劃</title>
+<meta name="description" content="好書不該被遺忘，讓絕版重生，讓思想流通。「絕版重生計劃」由 3ook.com 圖書館發起，協助版權持有人把絕版書製作成電子書，現正招募社會大眾參與。">
+<link rel="canonical" href="https://likecoin.github.io/project-out-of-print/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="絕版重生計劃">
+<meta property="og:description" content="好書不該被遺忘，讓絕版重生，讓思想流通。">
+<meta property="og:locale" content="zh_HK">
+<meta name="twitter:card" content="summary">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23b3421f'/%3E%3Cpath d='M8 8h7a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H8z' fill='%23fdf8f0'/%3E%3Cpath d='M24 8h-3a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h4z' fill='%23fdf8f0' opacity='.7'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#fdf8f0;
+  --paper-2:#f5ece0;
+  --ink:#1d1a17;
+  --ink-2:#4a423a;
+  --ink-3:#7a6f64;
+  --accent:#b3421f;
+  --accent-2:#8d3115;
+  --on-accent:#fff;
+  --line:#e2d5c3;
+  --card:#fffdf9;
+  --shadow:0 1px 2px rgba(45,32,20,.05),0 8px 24px -12px rgba(45,32,20,.18);
+  --serif:"Noto Serif TC",Georgia,"Songti TC","Source Han Serif TC",serif;
+  --sans:"Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#16130f;
+    --paper-2:#1e1a15;
+    --ink:#f2eadd;
+    --ink-2:#cfc3b2;
+    --ink-3:#9a8d7d;
+    --accent:#e2764e;
+    --accent-2:#f0946f;
+    --on-accent:#1b1510;
+    --line:#332c24;
+    --card:#1c1813;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#16130f;--paper-2:#1e1a15;--ink:#f2eadd;--ink-2:#cfc3b2;--ink-3:#9a8d7d;
+  --accent:#e2764e;--accent-2:#f0946f;--on-accent:#1b1510;--line:#332c24;--card:#1c1813;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px;-webkit-text-size-adjust:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:17px;line-height:1.85;
+  letter-spacing:.01em;-webkit-font-smoothing:antialiased;
+}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{color:var(--accent-2)}
+.wrap{width:100%;max-width:780px;margin:0 auto;padding:0 16px}
+h1,h2,h3{font-family:var(--serif);line-height:1.35;letter-spacing:.02em}
+
+/* nav */
+.nav{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(1.4) blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{display:flex;align-items:center;gap:16px;height:60px}
+.brand{font-family:var(--serif);font-weight:900;font-size:17px;color:var(--ink);text-decoration:none;white-space:nowrap}
+.nav-links{margin-left:auto;display:flex;gap:18px;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-links a{color:var(--ink-2);text-decoration:none;font-size:15px;white-space:nowrap}
+.nav-links a:hover{color:var(--accent)}
+
+/* hero */
+.hero{padding:76px 0 56px;text-align:center;position:relative;overflow:hidden}
+.hero::before{
+  content:"";position:absolute;inset:-60% -20% auto;height:520px;
+  background:radial-gradient(60% 60% at 50% 40%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 70%);
+  pointer-events:none;
+}
+.kicker{
+  position:relative;display:inline-block;font-size:13px;letter-spacing:.32em;
+  color:var(--accent);font-weight:700;margin:0 0 20px;text-indent:.32em;
+}
+.hero h1{
+  position:relative;margin:0;font-size:clamp(38px,9vw,66px);font-weight:900;
+  letter-spacing:.06em;
+}
+.hero .lede{
+  position:relative;margin:24px auto 0;max-width:22em;
+  font-family:var(--serif);font-size:clamp(18px,4.2vw,23px);font-weight:500;
+  color:var(--ink-2);line-height:2;
+}
+.hero .by{position:relative;margin-top:28px;font-size:15px;color:var(--ink-3)}
+.cta-row{position:relative;margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn{
+  display:inline-block;padding:13px 26px;border-radius:999px;font-size:16px;font-weight:700;
+  text-decoration:none;border:1px solid transparent;transition:transform .15s ease,background .15s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:var(--on-accent)}
+.btn-primary:hover{background:var(--accent-2);color:var(--on-accent)}
+.btn-ghost{border-color:var(--line);color:var(--ink);background:var(--card)}
+.btn-ghost:hover{color:var(--accent);border-color:var(--accent)}
+
+/* sections */
+section{padding:56px 0}
+.sec-head{margin-bottom:28px}
+.sec-head h2{
+  margin:0;font-size:clamp(24px,5.5vw,32px);font-weight:700;
+  display:flex;align-items:center;gap:14px;
+}
+.sec-head h2::after{content:"";flex:1;height:1px;background:var(--line)}
+.sec-head p{margin:10px 0 0;color:var(--ink-3);font-size:16px}
+.band{background:var(--paper-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+/* background cards */
+.reasons{display:grid;gap:16px;margin:0;padding:0;list-style:none}
+.reasons li{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:22px 24px;box-shadow:var(--shadow);display:flex;gap:18px;align-items:flex-start;
+}
+.reasons .num{
+  font-family:var(--serif);font-size:15px;font-weight:700;color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);
+  border-radius:999px;min-width:32px;height:32px;display:grid;place-items:center;flex:none;margin-top:5px;
+}
+.reasons p{margin:0;color:var(--ink-2)}
+.reasons strong{color:var(--ink);font-weight:700}
+
+/* faq */
+.faq{border-top:1px solid var(--line)}
+details{border-bottom:1px solid var(--line)}
+summary{
+  list-style:none;cursor:pointer;padding:20px 44px 20px 0;position:relative;
+  font-family:var(--serif);font-size:clamp(17px,4vw,19px);font-weight:700;color:var(--ink);
+}
+summary::-webkit-details-marker{display:none}
+summary:hover{color:var(--accent)}
+summary::after{
+  content:"";position:absolute;right:8px;top:50%;width:10px;height:10px;
+  border-right:2px solid var(--ink-3);border-bottom:2px solid var(--ink-3);
+  transform:translateY(-70%) rotate(45deg);transition:transform .2s ease;
+}
+details[open] summary::after{transform:translateY(-30%) rotate(225deg)}
+.answer{padding:0 4px 24px;color:var(--ink-2)}
+.answer p{margin:0 0 12px}
+.answer p:last-child{margin-bottom:0}
+.answer ul{margin:0 0 12px;padding-left:1.3em}
+.answer li{margin-bottom:8px}
+.answer .hl{
+  font-family:var(--serif);font-size:19px;font-weight:700;color:var(--ink);line-height:1.9;
+}
+
+/* cases */
+.cases{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.case{
+  display:block;background:var(--card);border:1px solid var(--line);border-left:4px solid var(--accent);
+  border-radius:10px;padding:18px 20px;text-decoration:none;box-shadow:var(--shadow);
+  transition:transform .15s ease,border-color .15s ease;
+}
+a.case:hover{transform:translateY(-2px);border-color:var(--accent)}
+.case .t{font-family:var(--serif);font-size:17px;font-weight:700;color:var(--ink);line-height:1.6}
+.case .a{margin-top:6px;font-size:14px;color:var(--ink-3)}
+.case.wip{border-left-color:var(--line);opacity:.85}
+.tag{
+  display:inline-block;margin-left:8px;font-size:12px;font-weight:700;letter-spacing:.06em;
+  color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:1px 8px;vertical-align:2px;
+}
+
+/* support */
+.support{display:grid;gap:16px}
+.support .item{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow);
+}
+.support h3{margin:0 0 8px;font-size:19px}
+.support p{margin:0 0 14px;color:var(--ink-2);font-size:16px}
+.support p:last-child{margin-bottom:0}
+
+footer{
+  border-top:1px solid var(--line);padding:40px 0 56px;
+  color:var(--ink-3);font-size:14px;text-align:center;line-height:2;
+}
+footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(--ink-2);letter-spacing:.06em}
+@media (max-width:600px){
+  body{font-size:16px}
+  .hero{padding:56px 0 44px}
+  section{padding:44px 0}
+  .brand{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="#top">絕版重生計劃</a>
+    <div class="nav-links">
+      <a href="#background">背景</a>
+      <a href="#faq">常見問題</a>
+      <a href="#cases">案例</a>
+      <a href="#support">參與</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <p class="kicker">OUT OF PRINT, REBORN</p>
+    <h1>絕版重生計劃</h1>
+    <p class="lede">好書不該被遺忘，<br>讓絕版重生，讓思想流通。</p>
+    <p class="by">由 <a href="https://3ook.com/?from=@ckxpress">3ook.com 圖書館</a> 發起，現正招募社會大眾參與</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#support">我要參與</a>
+      <a class="btn btn-ghost" href="#faq">了解計劃</a>
+    </div>
+  </div>
+</header>
+
+<section class="band" id="background">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>為甚麼</h2>
+      <p>絕版，不只是書店缺貨，而是一本書逐漸從公共記憶中消失。</p>
+    </div>
+    <ul class="reasons">
+      <li>
+        <span class="num">壹</span>
+        <p><strong>紙本書正在被銷毀。</strong>Anthropic 等公司大量購入二手書餵飼 AI，破壞性掃描然後銷毀。書的內容進入了模型，實體卻不復存在。</p>
+      </li>
+      <li>
+        <span class="num">貳</span>
+        <p><strong>圖書館收藏有限。</strong>公共圖書館只收藏部分書籍，很多作品在絕版後難以被公眾接觸到。</p>
+      </li>
+      <li>
+        <span class="num">參</span>
+        <p><strong>絕版是常態，不是例外。</strong>絕大部分書籍，本來就會隨著需求下降，踏入絕版的階段。</p>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>常見問題</h2>
+      <p>關於理念、版權、材料與費用。</p>
+    </div>
+    <div class="faq">
+
+      <details open>
+        <summary>「絕版重生」計劃理念？</summary>
+        <div class="answer">
+          <p class="hl">好書不該被遺忘，讓絕版重生，讓思想流通。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>「絕版重生」計劃發起方？</summary>
+        <div class="answer">
+          <p>3ook.com 圖書館，現正招募社會大眾參與。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>3ook.com 圖書館是甚麼？</summary>
+        <div class="answer">
+          <p>民營的電子圖書館，現有千餘本香港、台灣書籍，持續增加中。</p>
+          <p>3ook.com 像電子書的 Netflix，讀者可透過 iPhone、Android app 或網站使用，訂閱後無限閱聽。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>參與「絕版重生」計劃的書籍，必須要在 3ook.com 上架嗎？</summary>
+        <div class="answer">
+          <p>不一定。</p>
+          <p>3ook.com 圖書館是「絕版重生」計劃的後續配套，但兩者沒有必然關係。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>版權持有人只能自己去上架嗎？</summary>
+        <div class="answer">
+          <p>可以自行處理，也可以讓 <a href="https://3ook.com/?from=@ckxpress">3ook.com</a> 代勞。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>敏感書會上架嗎？</summary>
+        <div class="answer">
+          <p>「絕版重生」的重點在協助版權持有人製作電子書，製作後是否在電子書店上架，由版權持有人自行決定；是否容許上架，由各電子書店按當地法規決定。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>版權誰屬？</summary>
+        <div class="answer">
+          <p>參與「絕版重生」計劃並不影響版權歸屬，原版權持有人將保有電子書的版權，可自由使用，包括私下分發或自行上架各電子書平台。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>收費嗎？</summary>
+        <div class="answer">
+          <p>免費參加，歡迎自由定價支持計劃。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>食西北風乎？</summary>
+        <div class="answer">
+          <ul>
+            <li>敬請<a href="https://3ook.com/member?from=@ckxpress">訂閱 3ook.com 圖書館</a>，支持絕版重生。</li>
+            <li>招募義工。</li>
+          </ul>
+        </div>
+      </details>
+
+      <details>
+        <summary>我是作者，參與「絕版重生」計劃要得到出版社同意嗎？</summary>
+        <div class="answer">
+          <p>視乎出版合約是否已過期，及合約的具體內容，不一而足。</p>
+          <p>香港典型的出版合約為期三至五年，如合約包括電子版，在這段期間內，應由出版社參與「絕版重生」計劃。</p>
+          <p>合約期限後，一般而言文本的版權回歸作者，編輯、排版、封面設計等版權繼續由出版社持有，作者可跟出版社協商取得相關使用權，或由義工重新製作。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>版權持有人需要提供甚麼材料？</summary>
+        <div class="answer">
+          <p>最理想是能直接提供電子檔，如 Word、InDesign、PDF，圖片另外提供；其次是提供紙本書，由義工逆向製作電子版。</p>
+          <p>如果連紙本書都沒法提供，義工會盡力協助搜尋。</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>有甚麼案例？</summary>
+        <div class="answer">
+          <p>已有多本作品透過計劃重生，詳見<a href="#cases">重生書目</a>。</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+<section class="band" id="cases">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>重生書目</h2>
+      <p>已經或正在重生的作品。</p>
+    </div>
+    <div class="cases">
+      <a class="case" href="https://3ook.com/store/0x3ccd28dfa50a169435002b0bc3a363a0a7e23aa0?from=@ckxpress">
+        <div class="t">歐洲 12 國 16 天遊</div><div class="a">馬國明</div>
+      </a>
+      <a class="case" href="https://3ook.com/store/0x20c726bbb3e9718b695d22e019ca3602281c9bfa?from=@ckxpress">
+        <div class="t">〇〇年代：社運結束，耕田繼續</div><div class="a">梁景鴻</div>
+      </a>
+      <a class="case" href="https://3ook.com/library/0x009994d8bf90e436f9f96c699208389a11b79762?from=@ckxpress">
+        <div class="t">走過火紅的傘下銀髮</div><div class="a">楊寶𤋮</div>
+      </a>
+      <a class="case" href="https://3ook.com/library/0xedb267021d200f9c2b60a7a8aa7ca29fe156ebed?from=@ckxpress">
+        <div class="t">七千零七夜：戀戀書廊</div><div class="a">趙良駿</div>
+      </a>
+      <a class="case" href="https://3ook.com/store/0x194a69d88e8b1f96df990cc1750d9c828b5ea369?from=@ckxpress">
+        <div class="t">大事件：記香港 WTO 採訪</div><div class="a">鄭依依等</div>
+      </a>
+      <a class="case" href="https://3ook.com/store/0x4a2b36882ec92db6e9735bd0f02db458b74a85d8?from=@ckxpress">
+        <div class="t">火紅芝大</div><div class="a">崔少明</div>
+      </a>
+      <a class="case" href="https://3ook.com/store/0xde54e06d914918277c6c0a4bc779800d5f45ab9e?from=@ckxpress">
+        <div class="t">北韓迷宮</div><div class="a">薯伯伯</div>
+      </a>
+      <a class="case" href="https://3ook.com/store/0x8243b9c9ec6443b865db1a4800c78d5cd3d29941?from=@ckxpress">
+        <div class="t">馬聞</div><div class="a">馬聞義工組</div>
+      </a>
+      <div class="case wip">
+        <div class="t">Porcelain 白瓷<span class="tag">製作中</span></div><div class="a">李智良</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="support">
+  <div class="wrap">
+    <div class="sec-head">
+      <h2>參與計劃</h2>
+      <p>免費參加，歡迎自由定價支持計劃。</p>
+    </div>
+    <div class="support">
+      <div class="item">
+        <h3>我是版權持有人</h3>
+        <p>作者、譯者、出版社、或已故作者的家屬——只要手上有一本值得重生的絕版書，都歡迎聯絡我們。提供電子檔最理想，只有紙本書亦可，由義工逆向製作；連紙本都沒有，義工會盡力協助搜尋。版權仍然屬於你。</p>
+        <p><a class="btn btn-primary" href="https://3ook.com/?from=@ckxpress">聯絡 3ook.com</a></p>
+      </div>
+      <div class="item">
+        <h3>我想當義工</h3>
+        <p>校對、排版、掃描、修圖、電子書製作、聯絡版權持有人——每一本重生的書，背後都是一班義工。計劃現正招募社會大眾參與。</p>
+        <p><a class="btn btn-ghost" href="https://3ook.com/?from=@ckxpress">報名做義工</a></p>
+      </div>
+      <div class="item">
+        <h3>我想支持計劃</h3>
+        <p>敬請<a href="https://3ook.com/member?from=@ckxpress">訂閱 3ook.com 圖書館</a>，支持絕版重生。訂閱後可無限閱聽千餘本香港、台灣書籍，同時讓義工們不用食西北風。</p>
+        <p><a class="btn btn-primary" href="https://3ook.com/member?from=@ckxpress">訂閱 3ook.com</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="mark">絕版重生計劃</p>
+    <p>由 <a href="https://3ook.com/?from=@ckxpress">3ook.com 圖書館</a> 發起<br>好書不該被遺忘，讓絕版重生，讓思想流通。</p>
+  </div>
+</footer>
+
+</body>
+</html>
