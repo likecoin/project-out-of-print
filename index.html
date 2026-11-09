@@ -139,6 +139,20 @@ h1,h2,h3{font-family:var(--serif);line-height:1.35;letter-spacing:.02em}
 .btn-ghost{border-color:var(--line);color:var(--ink);background:var(--card)}
 .btn-ghost:hover{color:var(--accent);border-color:var(--accent)}
 
+/* 進度摘要（首頁）— 數字由 books.js 讀取公開分頁後填入；讀不到時整節不顯示 */
+/* 下一節（為甚麼）本身就是 band；此處若同樣上色，兩節會連成一片，故只用上緣分隔線 */
+.brief{padding:30px 0;background:var(--paper);border-top:1px solid var(--line)}
+.brief[hidden]{display:none}
+.brief-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.brief-head h2{margin:0;font-size:19px;font-weight:700}
+.brief-head a{margin-left:auto;font-size:15px}
+.brief-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
+.brief-tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.brief-tile .n{font-family:var(--serif);font-size:30px;font-weight:900;color:var(--ink);line-height:1.2}
+.brief-tile .k{margin-top:2px;font-size:13px;color:var(--ink-3)}
+.brief-tile .k b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
+@media (max-width:600px){.brief-tiles{grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}.brief-tile .n{font-size:25px}}
+
 /* sections */
 section{padding:56px 0}
 .sec-head{margin-bottom:28px}
@@ -269,6 +283,16 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     </div>
   </div>
 </header>
+
+<section class="brief" id="brief" hidden aria-label="計劃進度">
+  <div class="wrap">
+    <div class="brief-head">
+      <h2>計劃進度</h2>
+      <a href="progress.html">完整書目與進度 →</a>
+    </div>
+    <div class="brief-tiles" id="brief-tiles"></div>
+  </div>
+</section>
 
 <section class="band" id="background">
   <div class="wrap">
@@ -495,5 +519,38 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   </div>
 </footer>
 
+<script src="books.js"></script>
+<script>
+// 首頁只顯示數字；讀不到資料時整節維持隱藏，首頁不會出現錯誤訊息。
+(function () {
+  "use strict";
+  POOP.load().then(function (res) {
+    if (res.error || !res.books.length) return;
+    var counts = POOP.counts(res.books);
+    var host = document.getElementById("brief-tiles");
+    function tile(n, label, color) {
+      var t = document.createElement("div");
+      t.className = "brief-tile";
+      var num = document.createElement("div");
+      num.className = "n";
+      num.textContent = String(n);
+      var k = document.createElement("div");
+      k.className = "k";
+      if (color) {
+        var dot = document.createElement("b");
+        dot.style.background = color;
+        k.appendChild(dot);
+      }
+      k.appendChild(document.createTextNode(label));
+      t.appendChild(num);
+      t.appendChild(k);
+      host.appendChild(t);
+    }
+    tile(res.books.length, "書目總數", null);
+    POOP.STATES.forEach(function (s) { tile(counts[s.label] || 0, s.label, s.color); });
+    document.getElementById("brief").hidden = false;
+  });
+})();
+</script>
 </body>
 </html>

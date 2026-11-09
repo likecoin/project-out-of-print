@@ -207,135 +207,12 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   </div>
 </footer>
 
+<script src="books.js"></script>
 <script>
 (function () {
   "use strict";
 
-  // The published-to-web CSV of the sheet's public tab. Only the columns listed
-  // in COLS leave the spreadsheet; the working tab's series, contact leads,
-  // volunteer names and follow-up notes are never exposed here.
-  var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJeLBu3-mpLoE-75hVT79uCl6PnOUzNU-jSE8dluYvuZl4jkuNHTOjL7OLVLVx0n4JUYeqsWx3zyop/pub?gid=1498874683&single=true&output=csv";
-
-  // Expected headers, in any order; extra columns are ignored. Each field lists
-  // the spellings accepted, so renaming a heading in the sheet does not blank
-  // the page. The first entry is the canonical name used in messages.
-  var HEADERS = {
-    title:     ["書名"],
-    author:    ["作者", "作者／編者", "作者/編者", "作者編者"],
-    publisher: ["出版社"],
-    date:      ["出版年月", "出版年份", "出版日期"],
-    status:    ["狀態", "進度"],
-    url:       ["上架連結", "上架", "連結"]
-  };
-  var REQUIRED = ["title", "status"];   // without these the page has nothing to say
-  var COLS = {};                        // resolved against the sheet's actual headings
-
-  // Display order and colour of each status. Anything unrecognised falls into 未開始.
-  var STATES = [
-    { key: "已上架",    label: "已上架",    color: "#50e3c2" },
-    { key: "取得作者授權", label: "已獲授權",   color: "#0a7059" },
-    { key: "聯絡作者",   label: "聯絡中",    color: "#c89a3c" },
-    { key: "",        label: "未開始",    color: "#b8a894" }
-  ];
-
-  // Pick black or white text for a background, by WCAG relative luminance, so a
-  // status colour added to the sheet later still gets a readable pill.
-  function readableOn(hex) {
-    var m = /^#?([0-9a-f]{6})$/i.exec(hex);
-    if (!m) return "#06241e";
-    var v = parseInt(m[1], 16);
-    var ch = [(v >> 16) & 255, (v >> 8) & 255, v & 255].map(function (c) {
-      c = c / 255;
-      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-    });
-    var L = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
-    // contrast against white vs against near-black ink
-    return (1.05 / (L + 0.05)) >= ((L + 0.05) / 0.0598) ? "#ffffff" : "#06241e";
-  }
-
-  function stateOf(raw) {
-    var s = (raw || "").trim();
-    for (var i = 0; i < STATES.length; i++) {
-      if (STATES[i].key && s === STATES[i].key) return STATES[i];
-    }
-    // Unknown non-empty values are shown as-is rather than silently relabelled.
-    if (s) return { key: s, label: s, color: "#8e7f6d" };
-    return STATES[STATES.length - 1];
-  }
-
-  // RFC 4180 CSV: fields may be quoted and contain commas, quotes and newlines.
-  function parseCSV(text) {
-    var rows = [], row = [], field = "", inQuotes = false, i = 0;
-    if (text.charCodeAt(0) === 0xFEFF) i = 1;           // strip BOM
-    for (; i < text.length; i++) {
-      var c = text[i];
-      if (inQuotes) {
-        if (c === '"') {
-          if (text[i + 1] === '"') { field += '"'; i++; }
-          else inQuotes = false;
-        } else field += c;
-      } else if (c === '"') inQuotes = true;
-      else if (c === ",") { row.push(field); field = ""; }
-      else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
-      else if (c !== "\r") field += c;
-    }
-    if (field !== "" || row.length) { row.push(field); rows.push(row); }
-    return rows;
-  }
-
-  // Map each field to whichever heading the sheet actually uses.
-  function resolveHeaders(head) {
-    var missing = [];
-    Object.keys(HEADERS).forEach(function (field) {
-      var found = null;
-      HEADERS[field].forEach(function (name) {
-        if (!found && head.indexOf(name) !== -1) found = name;
-      });
-      COLS[field] = found;
-      if (!found && REQUIRED.indexOf(field) !== -1) missing.push(HEADERS[field][0]);
-    });
-    return missing;
-  }
-
-  // Every heading this page knows about, for scoring candidate header rows.
-  function knownHeadings() {
-    var all = [];
-    Object.keys(HEADERS).forEach(function (f) { all = all.concat(HEADERS[f]); });
-    return all;
-  }
-
-  // The header row is not always row 1: a published tab may carry a title or a
-  // blank row above it. Score the first few rows and take the best match.
-  function findHeaderRow(rows) {
-    var known = knownHeadings(), best = -1, bestScore = 0;
-    for (var i = 0; i < rows.length && i < 10; i++) {
-      var cells = rows[i].map(function (h) { return (h || "").trim(); });
-      var score = cells.filter(function (c) { return c && known.indexOf(c) !== -1; }).length;
-      if (score > bestScore) { bestScore = score; best = i; }
-    }
-    return bestScore >= 2 ? best : (rows.length ? 0 : -1);
-  }
-
-  function toObjects(rows) {
-    if (!rows.length) return { books: [], missing: ["書名"], found: [] };
-    var hi = findHeaderRow(rows);
-    var head = rows[hi].map(function (h) { return (h || "").trim(); });
-    var found = head.filter(function (h) { return h; });
-    var missing = resolveHeaders(head);
-    if (missing.length) return { books: [], missing: missing, found: found };
-    var books = rows.slice(hi + 1).map(function (r) {
-      var o = {};
-      head.forEach(function (h, i) { o[h] = (r[i] || "").trim(); });
-      return o;
-    }).filter(function (o) { return o[COLS.title]; });   // drop blank padding rows
-    return { books: books, missing: [], found: found };
-  }
-
-  // Read a field by its resolved heading; absent optional columns read as "".
-  function get(row, field) {
-    var col = COLS[field];
-    return col ? (row[col] || "") : "";
-  }
+  var STATES = POOP.STATES;
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -347,13 +224,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   function renderSummary(books) {
     var host = document.getElementById("summary");
     host.textContent = "";
-
-    var counts = {};
-    STATES.forEach(function (s) { counts[s.label] = 0; });
-    books.forEach(function (b) {
-      var s = stateOf(get(b, "status"));
-      counts[s.label] = (counts[s.label] || 0) + 1;
-    });
+    var counts = POOP.counts(books);
 
     var tiles = el("div", "tiles");
     var total = el("div", "tile");
@@ -386,11 +257,10 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 
     var legend = el("div", "legend");
     STATES.forEach(function (s) {
-      var n = counts[s.label] || 0;
       var span = el("span");
       var i2 = el("i"); i2.style.background = s.color;
       span.appendChild(i2);
-      span.appendChild(document.createTextNode(s.label + "　" + n + " 本"));
+      span.appendChild(document.createTextNode(s.label + "　" + (counts[s.label] || 0) + " 本"));
       legend.appendChild(span);
     });
     host.appendChild(legend);
@@ -443,10 +313,10 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
       var shown = 0;
 
       books.forEach(function (b) {
-        var st = stateOf(get(b, "status"));
+        var st = POOP.stateOf(POOP.get(b, "status"));
         if (want && st.label !== want) return;
         if (q) {
-          var hay = [get(b, "title"), get(b, "author"), get(b, "publisher")]
+          var hay = [POOP.get(b, "title"), POOP.get(b, "author"), POOP.get(b, "publisher")]
                       .join(" ").toLowerCase();
           if (hay.indexOf(q) === -1) return;
         }
@@ -454,24 +324,24 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 
         var tr = document.createElement("tr");
         var td1 = el("td", "title");
-        var url = get(b, "url");
-        if (url && /^https:\/\//.test(url)) {         // only ever linked, never injected as HTML
-          var a = el("a", null, get(b, "title"));
+        var url = POOP.get(b, "url");
+        if (url && /^https:\/\//.test(url)) {   // 只接受 https，且一律以 textContent 寫入
+          var a = el("a", null, POOP.get(b, "title"));
           a.href = url;
           a.rel = "noopener";
           td1.appendChild(a);
         } else {
-          td1.appendChild(document.createTextNode(get(b, "title")));
+          td1.appendChild(document.createTextNode(POOP.get(b, "title")));
         }
         tr.appendChild(td1);
-        tr.appendChild(el("td", null, get(b, "author") || "—"));
-        tr.appendChild(el("td", "meta", get(b, "publisher") || "—"));
-        tr.appendChild(el("td", "meta", get(b, "date") || "—"));
+        tr.appendChild(el("td", null, POOP.get(b, "author") || "—"));
+        tr.appendChild(el("td", "meta", POOP.get(b, "publisher") || "—"));
+        tr.appendChild(el("td", "meta", POOP.get(b, "date") || "—"));
 
         var td5 = document.createElement("td");
         var pill = el("span", "pill", st.label);
         pill.style.background = st.color;
-        pill.style.color = readableOn(st.color);
+        pill.style.color = POOP.readableOn(st.color);
         td5.appendChild(pill);
         tr.appendChild(td5);
 
@@ -480,12 +350,12 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 
       count.textContent = "顯示 " + shown + " / " + books.length + " 本";
       if (!shown) {
-        var tr = document.createElement("tr");
+        var tr2 = document.createElement("tr");
         var td = el("td", null, "沒有符合的書目。");
         td.colSpan = 5;
         td.style.color = "var(--ink-3)";
-        tr.appendChild(td);
-        tbody.appendChild(tr);
+        tr2.appendChild(td);
+        tbody.appendChild(tr2);
       }
     }
 
@@ -495,7 +365,8 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   }
 
   function fail(message) {
-    document.getElementById("summary").innerHTML = "";
+    var host = document.getElementById("summary");
+    host.textContent = "";
     var box = el("div", "msg");
     box.appendChild(document.createTextNode(message + " 你可以改為瀏覽"));
     var a = el("a", null, "首頁的重生書目");
@@ -506,40 +377,23 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     m.href = "mailto:poop@3ook.com";
     box.appendChild(m);
     box.appendChild(document.createTextNode("。"));
-    document.getElementById("summary").appendChild(box);
+    host.appendChild(box);
     document.getElementById("table-area").textContent = "";
   }
 
-  if (!CSV_URL || CSV_URL.indexOf("REPLACE_WITH") === 0) {
-    fail("書目來源尚未設定。");
-    return;
-  }
-
-  fetch(CSV_URL, { cache: "no-store" })
-    .then(function (r) {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.text();
-    })
-    .then(function (text) {
-      // A URL that is not the CSV export answers with an HTML page; parsing that
-      // as CSV would otherwise surface as a confusing "missing column".
-      if (/^\s*</.test(text) || /<html/i.test(text.slice(0, 400))) {
-        fail("書目來源回應的是網頁而非 CSV，發佈網址可能不是 CSV 格式。");
-        return;
-      }
-      var out = toObjects(parseCSV(text));
-      if (out.missing.length) {
-        fail("書目來源缺少「" + out.missing.join("」「") + "」欄。讀到的欄位為："
-             + (out.found.length ? out.found.slice(0, 12).join("、") : "（空白）") + "。");
-        return;
-      }
-      if (!out.books.length) throw new Error("empty");
-      renderSummary(out.books);
-      renderTable(out.books);
-    })
-    .catch(function () {
+  POOP.load().then(function (res) {
+    if (res.error === "html") {
+      fail("書目來源回應的是網頁而非 CSV，發佈網址可能不是 CSV 格式。");
+    } else if (res.error === "missing") {
+      fail("書目來源缺少「" + res.missing.join("」「") + "」欄。讀到的欄位為："
+           + (res.found.length ? res.found.slice(0, 12).join("、") : "（空白）") + "。");
+    } else if (res.error) {
       fail("暫時讀取不到最新書目。");
-    });
+    } else {
+      renderSummary(res.books);
+      renderTable(res.books);
+    }
+  });
 })();
 </script>
 </body>
