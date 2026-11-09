@@ -212,13 +212,13 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   "use strict";
 
   // The published-to-web CSV of the sheet's public tab. Only the columns listed
-  // in COLS leave the spreadsheet; the working tab's contact leads, volunteer
-  // names and follow-up notes are never exposed here.
+  // in COLS leave the spreadsheet; the working tab's series, contact leads,
+  // volunteer names and follow-up notes are never exposed here.
   var CSV_URL = "REPLACE_WITH_PUBLISHED_CSV_URL";
 
   // Expected headers, in any order. Extra columns are ignored.
   var COLS = { title: "書名", author: "作者", publisher: "出版社",
-               series: "系列", date: "出版年月", status: "狀態", url: "上架連結" };
+               date: "出版年月", status: "狀態", url: "上架連結" };
 
   // Display order and colour of each status. Anything unrecognised falls into 未開始.
   var STATES = [
@@ -392,7 +392,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
         var st = stateOf(b[COLS.status]);
         if (want && st.label !== want) return;
         if (q) {
-          var hay = [b[COLS.title], b[COLS.author], b[COLS.publisher], b[COLS.series]]
+          var hay = [b[COLS.title], b[COLS.author], b[COLS.publisher]]
                       .join(" ").toLowerCase();
           if (hay.indexOf(q) === -1) return;
         }
@@ -408,11 +408,6 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
           td1.appendChild(a);
         } else {
           td1.appendChild(document.createTextNode(b[COLS.title]));
-        }
-        if (b[COLS.series]) {
-          var ser = el("div", "meta", b[COLS.series]);
-          ser.style.fontWeight = "400";
-          td1.appendChild(ser);
         }
         tr.appendChild(td1);
         tr.appendChild(el("td", null, b[COLS.author] || "—"));
