@@ -108,7 +108,7 @@ h1,h2,h3{font-family:var(--serif);line-height:1.35;letter-spacing:.02em}
 @media (max-width:600px){.shelf a{width:62px}.shelf{gap:8px;padding:12px}}
 
 /* hero */
-.hero{padding:76px 0 56px;text-align:center;position:relative;overflow:hidden}
+.hero{padding:44px 0 48px;text-align:center;position:relative;overflow:hidden}
 .hero::before{
   content:"";position:absolute;inset:-60% -20% auto;height:520px;
   background:radial-gradient(60% 60% at 50% 40%,color-mix(in srgb,var(--brand) 22%,transparent),transparent 70%);
@@ -119,16 +119,11 @@ h1,h2,h3{font-family:var(--serif);line-height:1.35;letter-spacing:.02em}
   color:var(--accent);font-weight:700;margin:0 0 20px;text-indent:.18em;
 }
 .hero h1{
-  position:relative;margin:0;font-size:clamp(38px,9vw,66px);font-weight:900;
-  letter-spacing:.06em;
+  position:relative;margin:0 auto;max-width:20em;
+  font-size:clamp(24px,5vw,38px);font-weight:700;line-height:1.9;   /* 字距沿用 h1,h2,h3 的 .02em */
 }
-.hero .lede{
-  position:relative;margin:24px auto 0;max-width:22em;
-  font-family:var(--serif);font-size:clamp(18px,4.2vw,23px);font-weight:500;
-  color:var(--ink-2);line-height:2;
-}
-.hero .by{position:relative;margin-top:28px;font-size:15px;color:var(--ink-3)}
-.cta-row{position:relative;margin-top:34px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero .by{position:relative;margin-top:18px;font-size:15px;color:var(--ink-3)}
+.cta-row{position:relative;margin-top:30px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .btn{
   display:inline-block;padding:13px 26px;border-radius:999px;font-size:16px;font-weight:700;
   text-decoration:none;border:1px solid transparent;transition:transform .15s ease,background .15s ease;
@@ -140,19 +135,18 @@ h1,h2,h3{font-family:var(--serif);line-height:1.35;letter-spacing:.02em}
 .btn-ghost:hover{color:var(--accent);border-color:var(--accent)}
 
 /* 進度摘要（首頁）— 數字由 books.js 讀取公開分頁後填入；讀不到時整節不顯示 */
-/* 夾在封面長條（淺米）與首屏（米白）之間，故用米白並以上下緣分隔 */
-.brief{padding:26px 0;background:var(--paper);border-bottom:1px solid var(--line)}
+/* 進度摘要 —— 現已併入首屏，不再自成一節，故無底色與分隔線。
+   數字由 books.js 讀取公開分頁後填入；讀不到時整塊收起。 */
+.brief{position:relative;margin:32px auto 0;max-width:820px}
 .brief[hidden]{display:none}
-.brief-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:16px}
-.brief-head h2{margin:0;font-size:19px;font-weight:700}
-.brief-head a{margin-left:auto;font-size:15px}
-.brief-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px}
-.brief-tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-.brief-tile .n{font-family:var(--serif);font-size:30px;font-weight:900;color:var(--ink);line-height:1.2}
+.brief-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.brief-tile{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 10px;text-align:center}
+.brief-tile .n{font-family:var(--serif);font-size:29px;font-weight:900;color:var(--ink);line-height:1.2}
 .brief-tiles[aria-busy="true"] .brief-tile .n{color:var(--ink-3);opacity:.45}
-.brief-tile .k{margin-top:2px;font-size:13px;color:var(--ink-3)}
+.brief-tile .k{margin-top:2px;font-size:13px;color:var(--ink-3);white-space:nowrap}
 .brief-tile .k b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
-@media (max-width:600px){.brief-tiles{grid-template-columns:repeat(auto-fit,minmax(96px,1fr))}.brief-tile .n{font-size:25px}}
+.brief-more{display:inline-block;margin-top:14px;font-size:15px}
+@media (max-width:600px){.brief-tiles{grid-template-columns:repeat(auto-fit,minmax(94px,1fr));gap:8px}.brief-tile .n{font-size:24px}.brief-tile .k{font-size:12px}}
 
 /* sections */
 section{padding:56px 0}
@@ -272,30 +266,25 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   </div>
 </section>
 
-<section class="brief" id="brief" aria-label="計劃進度">
-  <div class="wrap">
-    <div class="brief-head">
-      <h2>計劃進度</h2>
-      <a href="progress.html">完整書目與進度 →</a>
-    </div>
-    <!-- 佔位磚與載入後的結構相同，因此在任何闊度下預留的高度都準確，
-         不必為各斷點猜 min-height。數字載入後就地替換。 -->
-    <div class="brief-tiles" id="brief-tiles" aria-busy="true">
-      <div class="brief-tile"><div class="n">—</div><div class="k">書目總數</div></div>
-      <div class="brief-tile"><div class="n">—</div><div class="k">已上架</div></div>
-      <div class="brief-tile"><div class="n">—</div><div class="k">已獲授權</div></div>
-      <div class="brief-tile"><div class="n">—</div><div class="k">聯絡中</div></div>
-      <div class="brief-tile"><div class="n">—</div><div class="k">未開始</div></div>
-    </div>
-  </div>
-</section>
-
 <header class="hero" id="top">
   <div class="wrap">
     <p class="kicker">POOP: Project Out-Of-Print</p>
-    <h1>絕版重生計劃</h1>
-    <p class="lede">好書不該被遺忘，<br>讓絕版重生，讓思想流通。</p>
+    <!-- 標題用訊息本身。計劃名已在導覽列出現，首屏不再重複一次大字。 -->
+    <h1>好書不該被遺忘，<br>讓絕版重生，讓思想流通。</h1>
     <p class="by">由 <a href="https://3ook.com/library?from=@ckxpress&utm_campaign=poop">3ook.com 圖書館</a> 發起，現正招募社會大眾參與</p>
+
+    <div class="brief" id="brief">
+      <!-- 佔位磚與載入後的結構相同，因此在任何闊度下預留的高度都準確。 -->
+      <div class="brief-tiles" id="brief-tiles" aria-busy="true">
+        <div class="brief-tile"><div class="n">—</div><div class="k">書目總數</div></div>
+        <div class="brief-tile"><div class="n">—</div><div class="k">已上架</div></div>
+        <div class="brief-tile"><div class="n">—</div><div class="k">已獲授權</div></div>
+        <div class="brief-tile"><div class="n">—</div><div class="k">聯絡中</div></div>
+        <div class="brief-tile"><div class="n">—</div><div class="k">未開始</div></div>
+      </div>
+      <a class="brief-more" href="progress.html">完整書目與進度 →</a>
+    </div>
+
     <div class="cta-row">
       <a class="btn btn-primary" href="#support">我要參與</a>
       <a class="btn btn-ghost" href="#faq">了解計劃</a>
