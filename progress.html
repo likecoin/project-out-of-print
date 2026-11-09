@@ -297,17 +297,38 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     return missing;
   }
 
+  // Every heading this page knows about, for scoring candidate header rows.
+  function knownHeadings() {
+    var all = [];
+    Object.keys(HEADERS).forEach(function (f) { all = all.concat(HEADERS[f]); });
+    return all;
+  }
+
+  // The header row is not always row 1: a published tab may carry a title or a
+  // blank row above it. Score the first few rows and take the best match.
+  function findHeaderRow(rows) {
+    var known = knownHeadings(), best = -1, bestScore = 0;
+    for (var i = 0; i < rows.length && i < 10; i++) {
+      var cells = rows[i].map(function (h) { return (h || "").trim(); });
+      var score = cells.filter(function (c) { return c && known.indexOf(c) !== -1; }).length;
+      if (score > bestScore) { bestScore = score; best = i; }
+    }
+    return bestScore >= 2 ? best : (rows.length ? 0 : -1);
+  }
+
   function toObjects(rows) {
-    if (!rows.length) return { books: [], missing: ["書名"] };
-    var head = rows[0].map(function (h) { return (h || "").trim(); });
+    if (!rows.length) return { books: [], missing: ["書名"], found: [] };
+    var hi = findHeaderRow(rows);
+    var head = rows[hi].map(function (h) { return (h || "").trim(); });
+    var found = head.filter(function (h) { return h; });
     var missing = resolveHeaders(head);
-    if (missing.length) return { books: [], missing: missing };
-    var books = rows.slice(1).map(function (r) {
+    if (missing.length) return { books: [], missing: missing, found: found };
+    var books = rows.slice(hi + 1).map(function (r) {
       var o = {};
       head.forEach(function (h, i) { o[h] = (r[i] || "").trim(); });
       return o;
     }).filter(function (o) { return o[COLS.title]; });   // drop blank padding rows
-    return { books: books, missing: [] };
+    return { books: books, missing: [], found: found };
   }
 
   // Read a field by its resolved heading; absent optional columns read as "".
@@ -500,9 +521,16 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
       return r.text();
     })
     .then(function (text) {
+      // A URL that is not the CSV export answers with an HTML page; parsing that
+      // as CSV would otherwise surface as a confusing "missing column".
+      if (/^\s*</.test(text) || /<html/i.test(text.slice(0, 400))) {
+        fail("書目來源回應的是網頁而非 CSV，發佈網址可能不是 CSV 格式。");
+        return;
+      }
       var out = toObjects(parseCSV(text));
       if (out.missing.length) {
-        fail("書目來源缺少「" + out.missing.join("」「") + "」欄。");
+        fail("書目來源缺少「" + out.missing.join("」「") + "」欄。讀到的欄位為："
+             + (out.found.length ? out.found.slice(0, 12).join("、") : "（空白）") + "。");
         return;
       }
       if (!out.books.length) throw new Error("empty");
