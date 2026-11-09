@@ -6,7 +6,12 @@
 
 ## 內容
 
-- `index.html` — 網站全部內容（HTML／CSS 內嵌，無需建置步驟，無 JavaScript）
+- `index.html` — 首頁，全部內容內嵌（HTML／CSS，無需建置步驟，無 JavaScript）
+- `progress.html` — 計劃進展頁。書目即時讀取 Google 試算表「已發佈到網路」的公開分頁 CSV，
+  因此這一頁需要 JavaScript；來源網址是檔案內 `CSV_URL` 一個常數。
+  公開分頁只含書名、作者、出版社、出版年月、狀態、上架連結；
+  工作表上的系列、作者聯絡線索、義工姓名與跟進記錄不會離開原表。
+- `og-image.jpg` — 社交平台預覽圖
 
 ## 本機預覽
 
