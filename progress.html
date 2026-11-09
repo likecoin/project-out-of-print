@@ -214,11 +214,21 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   // The published-to-web CSV of the sheet's public tab. Only the columns listed
   // in COLS leave the spreadsheet; the working tab's series, contact leads,
   // volunteer names and follow-up notes are never exposed here.
-  var CSV_URL = "REPLACE_WITH_PUBLISHED_CSV_URL";
+  var CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSJeLBu3-mpLoE-75hVT79uCl6PnOUzNU-jSE8dluYvuZl4jkuNHTOjL7OLVLVx0n4JUYeqsWx3zyop/pub?gid=1498874683&single=true&output=csv";
 
-  // Expected headers, in any order. Extra columns are ignored.
-  var COLS = { title: "書名", author: "作者", publisher: "出版社",
-               date: "出版年月", status: "狀態", url: "上架連結" };
+  // Expected headers, in any order; extra columns are ignored. Each field lists
+  // the spellings accepted, so renaming a heading in the sheet does not blank
+  // the page. The first entry is the canonical name used in messages.
+  var HEADERS = {
+    title:     ["書名"],
+    author:    ["作者", "作者／編者", "作者/編者", "作者編者"],
+    publisher: ["出版社"],
+    date:      ["出版年月", "出版年份", "出版日期"],
+    status:    ["狀態", "進度"],
+    url:       ["上架連結", "上架", "連結"]
+  };
+  var REQUIRED = ["title", "status"];   // without these the page has nothing to say
+  var COLS = {};                        // resolved against the sheet's actual headings
 
   // Display order and colour of each status. Anything unrecognised falls into 未開始.
   var STATES = [
@@ -273,14 +283,37 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     return rows;
   }
 
+  // Map each field to whichever heading the sheet actually uses.
+  function resolveHeaders(head) {
+    var missing = [];
+    Object.keys(HEADERS).forEach(function (field) {
+      var found = null;
+      HEADERS[field].forEach(function (name) {
+        if (!found && head.indexOf(name) !== -1) found = name;
+      });
+      COLS[field] = found;
+      if (!found && REQUIRED.indexOf(field) !== -1) missing.push(HEADERS[field][0]);
+    });
+    return missing;
+  }
+
   function toObjects(rows) {
-    if (!rows.length) return [];
+    if (!rows.length) return { books: [], missing: ["書名"] };
     var head = rows[0].map(function (h) { return (h || "").trim(); });
-    return rows.slice(1).map(function (r) {
+    var missing = resolveHeaders(head);
+    if (missing.length) return { books: [], missing: missing };
+    var books = rows.slice(1).map(function (r) {
       var o = {};
       head.forEach(function (h, i) { o[h] = (r[i] || "").trim(); });
       return o;
     }).filter(function (o) { return o[COLS.title]; });   // drop blank padding rows
+    return { books: books, missing: [] };
+  }
+
+  // Read a field by its resolved heading; absent optional columns read as "".
+  function get(row, field) {
+    var col = COLS[field];
+    return col ? (row[col] || "") : "";
   }
 
   function el(tag, cls, text) {
@@ -297,7 +330,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     var counts = {};
     STATES.forEach(function (s) { counts[s.label] = 0; });
     books.forEach(function (b) {
-      var s = stateOf(b[COLS.status]);
+      var s = stateOf(get(b, "status"));
       counts[s.label] = (counts[s.label] || 0) + 1;
     });
 
@@ -389,10 +422,10 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
       var shown = 0;
 
       books.forEach(function (b) {
-        var st = stateOf(b[COLS.status]);
+        var st = stateOf(get(b, "status"));
         if (want && st.label !== want) return;
         if (q) {
-          var hay = [b[COLS.title], b[COLS.author], b[COLS.publisher]]
+          var hay = [get(b, "title"), get(b, "author"), get(b, "publisher")]
                       .join(" ").toLowerCase();
           if (hay.indexOf(q) === -1) return;
         }
@@ -400,19 +433,19 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 
         var tr = document.createElement("tr");
         var td1 = el("td", "title");
-        var url = b[COLS.url];
+        var url = get(b, "url");
         if (url && /^https:\/\//.test(url)) {         // only ever linked, never injected as HTML
-          var a = el("a", null, b[COLS.title]);
+          var a = el("a", null, get(b, "title"));
           a.href = url;
           a.rel = "noopener";
           td1.appendChild(a);
         } else {
-          td1.appendChild(document.createTextNode(b[COLS.title]));
+          td1.appendChild(document.createTextNode(get(b, "title")));
         }
         tr.appendChild(td1);
-        tr.appendChild(el("td", null, b[COLS.author] || "—"));
-        tr.appendChild(el("td", "meta", b[COLS.publisher] || "—"));
-        tr.appendChild(el("td", "meta", b[COLS.date] || "—"));
+        tr.appendChild(el("td", null, get(b, "author") || "—"));
+        tr.appendChild(el("td", "meta", get(b, "publisher") || "—"));
+        tr.appendChild(el("td", "meta", get(b, "date") || "—"));
 
         var td5 = document.createElement("td");
         var pill = el("span", "pill", st.label);
@@ -467,10 +500,14 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
       return r.text();
     })
     .then(function (text) {
-      var books = toObjects(parseCSV(text));
-      if (!books.length) throw new Error("empty");
-      renderSummary(books);
-      renderTable(books);
+      var out = toObjects(parseCSV(text));
+      if (out.missing.length) {
+        fail("書目來源缺少「" + out.missing.join("」「") + "」欄。");
+        return;
+      }
+      if (!out.books.length) throw new Error("empty");
+      renderSummary(out.books);
+      renderTable(out.books);
     })
     .catch(function () {
       fail("暫時讀取不到最新書目。");
