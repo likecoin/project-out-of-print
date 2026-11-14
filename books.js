@@ -103,6 +103,22 @@
     return bestScore >= 2 ? best : (rows.length ? 0 : -1);
   }
 
+  // 試算表公式出錯時，整格會變成 #VALUE! 之類的錯誤字；這與「欄位被改名」
+  // 是兩回事，分開報告才說得出下一步該找誰修。
+  var ERROR_CELL = /^#(VALUE!|REF!|N\/A|NAME\?|DIV\/0!|NUM!|NULL!|ERROR!)$/;
+
+  function errorCell(rows) {
+    for (var i = 0; i < rows.length && i < 5; i++) {
+      for (var j = 0; j < rows[i].length; j++) {
+        var c = (rows[i][j] || "").trim();
+        if (ERROR_CELL.test(c)) return c;
+      }
+    }
+    return null;
+  }
+
+  function isErrorCell(v) { return ERROR_CELL.test((v || "").trim()); }
+
   function toObjects(rows) {
     if (!rows.length) return { books: [], missing: ["書名"], found: [] };
     var hi = findHeaderRow(rows);
@@ -114,7 +130,10 @@
       var o = {};
       head.forEach(function (h, i) { o[h] = (r[i] || "").trim(); });
       return o;
-    }).filter(function (o) { return o[COLS.title]; });   // 略過空白補位列
+    }).filter(function (o) {
+      var t = o[COLS.title];
+      return t && !isErrorCell(t);     // 略過空白補位列與公式錯誤格
+    });
     return { books: books, missing: [], found: found };
   }
 
@@ -132,20 +151,6 @@
       c[s.label] = (c[s.label] || 0) + 1;
     });
     return c;
-  }
-
-  // 試算表公式出錯時，整格會變成 #VALUE! 之類的錯誤字；這與「欄位被改名」
-  // 是兩回事，分開報告才說得出下一步該找誰修。
-  var ERROR_CELL = /^#(VALUE!|REF!|N\/A|NAME\?|DIV\/0!|NUM!|NULL!|ERROR!)$/;
-
-  function errorCell(rows) {
-    for (var i = 0; i < rows.length && i < 5; i++) {
-      for (var j = 0; j < rows[i].length; j++) {
-        var c = (rows[i][j] || "").trim();
-        if (ERROR_CELL.test(c)) return c;
-      }
-    }
-    return null;
   }
 
   // 一律以 { books } 或 { error } 回覆，呼叫端不必各自判斷失敗原因。
@@ -167,7 +172,11 @@
           if (bad) return { error: "formula", cell: bad };
           return { error: "missing", missing: out.missing, found: out.found };
         }
-        if (!out.books.length) return { error: "empty" };
+        if (!out.books.length) {
+          var blank = errorCell(rows);
+          if (blank) return { error: "formula", cell: blank };
+          return { error: "empty" };
+        }
         return { books: out.books };
       })
       .catch(function () { return { error: "fetch" }; });
