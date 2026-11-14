@@ -134,6 +134,20 @@
     return c;
   }
 
+  // 試算表公式出錯時，整格會變成 #VALUE! 之類的錯誤字；這與「欄位被改名」
+  // 是兩回事，分開報告才說得出下一步該找誰修。
+  var ERROR_CELL = /^#(VALUE!|REF!|N\/A|NAME\?|DIV\/0!|NUM!|NULL!|ERROR!)$/;
+
+  function errorCell(rows) {
+    for (var i = 0; i < rows.length && i < 5; i++) {
+      for (var j = 0; j < rows[i].length; j++) {
+        var c = (rows[i][j] || "").trim();
+        if (ERROR_CELL.test(c)) return c;
+      }
+    }
+    return null;
+  }
+
   // 一律以 { books } 或 { error } 回覆，呼叫端不必各自判斷失敗原因。
   function load() {
     return fetch(CSV_URL, { cache: "no-store" })
@@ -146,8 +160,11 @@
         if (/^\s*</.test(text) || /<html/i.test(text.slice(0, 400))) {
           return { error: "html" };
         }
-        var out = toObjects(parseCSV(text));
+        var rows = parseCSV(text);
+        var out = toObjects(rows);
         if (out.missing.length) {
+          var bad = errorCell(rows);
+          if (bad) return { error: "formula", cell: bad };
           return { error: "missing", missing: out.missing, found: out.found };
         }
         if (!out.books.length) return { error: "empty" };

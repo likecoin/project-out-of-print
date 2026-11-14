@@ -384,6 +384,8 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   POOP.load().then(function (res) {
     if (res.error === "html") {
       fail("書目來源回應的是網頁而非 CSV，發佈網址可能不是 CSV 格式。");
+    } else if (res.error === "formula") {
+      fail("書目來源的試算表公式出錯（" + res.cell + "），進度暫時無法更新。");
     } else if (res.error === "missing") {
       fail("書目來源缺少「" + res.missing.join("」「") + "」欄。讀到的欄位為："
            + (res.found.length ? res.found.slice(0, 12).join("、") : "（空白）") + "。");
