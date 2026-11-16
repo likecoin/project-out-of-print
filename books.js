@@ -24,11 +24,12 @@
   var COLS = {};                        // 對應到試算表實際使用的標題
 
   // 顯示次序與顏色；未認得的狀態照原文顯示，不會被靜默歸類。
+  // slug 供 progress.html 的網址片段使用，例如 progress.html#released 直接篩出已上架。
   var STATES = [
-    { key: "已上架",     label: "已上架",  color: "#50e3c2" },
-    { key: "取得作者授權", label: "已獲授權", color: "#0a7059" },
-    { key: "聯絡作者",    label: "聯絡中",  color: "#c89a3c" },
-    { key: "",          label: "未開始",  color: "#b8a894" }
+    { key: "已上架",     label: "已上架",  slug: "released",    color: "#50e3c2" },
+    { key: "取得作者授權", label: "已獲授權", slug: "licensed",    color: "#0a7059" },
+    { key: "聯絡作者",    label: "聯絡中",  slug: "contacting",  color: "#c89a3c" },
+    { key: "",          label: "未開始",  slug: "not-started", color: "#b8a894" }
   ];
 
   // 按背景相對亮度選黑或白，日後在試算表新增狀態色仍可讀。

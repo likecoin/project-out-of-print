@@ -359,8 +359,41 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
       }
     }
 
+    // 網址片段對應篩選的狀態，例如 progress.html#released 直接篩出已上架，
+    // #all 或沒有片段則顯示全部。一條連結就指得到某個狀態的書目。
+    function labelFromHash() {
+      var slug = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim().toLowerCase();
+      if (!slug || slug === "all") return "";
+      for (var i = 0; i < STATES.length; i++) {
+        // 也接受直接寫中文狀態，例如 #已上架
+        if (STATES[i].slug === slug || STATES[i].label === slug) return STATES[i].label;
+      }
+      return null;        // 不認得的片段：當成沒指定，不動現有的選擇
+    }
+
+    function applyHash() {
+      var label = labelFromHash();
+      if (label === null || filter.value === label) return;
+      filter.value = label;
+      draw();
+    }
+
+    // 篩選改動後把片段寫回網址，讓使用者複製到的連結就是眼前這一頁。
+    function writeHash() {
+      var slug = "";
+      STATES.forEach(function (s) { if (s.label === filter.value) slug = s.slug; });
+      try {
+        history.replaceState(null, "",
+          location.pathname + location.search + (slug ? "#" + slug : ""));
+      } catch (e) { /* 例如 file:// 下不支援，略過即可 */ }
+    }
+
     search.addEventListener("input", draw);
-    filter.addEventListener("change", draw);
+    filter.addEventListener("change", function () { writeHash(); draw(); });
+    window.addEventListener("hashchange", applyHash);
+
+    var fromHash = labelFromHash();
+    if (fromHash) filter.value = fromHash;
     draw();
   }
 
