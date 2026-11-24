@@ -521,7 +521,8 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   </div>
 </footer>
 
-<script src="books.js"></script>
+<!-- 版本號：books.js 有改動時一併加一，免得新頁面配到瀏覽器快取裡的舊 script。 -->
+<script src="books.js?v=2"></script>
 <script>
 // 首頁只顯示數字；讀不到資料時整節維持隱藏，首頁不會出現錯誤訊息。
 (function () {
@@ -557,7 +558,9 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     host.textContent = "";                       // 清走佔位磚
     tile(res.books.length, "書目總數", null, "progress.html");
     POOP.STATES.forEach(function (s) {
-      tile(counts[s.label] || 0, s.label, s.color, "progress.html#" + s.slug);
+      // slug 來自 books.js；萬一配到沒有 slug 的舊版，寧可連去整頁書目也不要 #undefined。
+      tile(counts[s.label] || 0, s.label, s.color,
+           "progress.html" + (s.slug ? "#" + s.slug : ""));
     });
     host.removeAttribute("aria-busy");
   });
