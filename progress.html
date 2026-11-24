@@ -209,12 +209,13 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 </footer>
 
 <!-- 版本號：books.js 有改動時一併加一，免得新頁面配到瀏覽器快取裡的舊 script。 -->
-<script src="books.js?v=2"></script>
+<script src="books.js?v=3"></script>
 <script>
 (function () {
   "use strict";
 
   var STATES = POOP.STATES;
+  var GROUPS = POOP.GROUPS || [];     // 合併篩選項，例如「已獲授權」涵蓋三種授權
 
   function el(tag, cls, text) {
     var n = document.createElement(tag);
@@ -280,6 +281,9 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     var filter = el("select");
     filter.setAttribute("aria-label", "按狀態篩選");
     filter.appendChild(new Option("全部狀態", ""));
+    GROUPS.forEach(function (g) {
+      filter.appendChild(new Option(g.label + "（合計）", "group:" + g.slug));
+    });
     STATES.forEach(function (s) { filter.appendChild(new Option(s.label, s.label)); });
     var count = el("span", "count");
     controls.appendChild(search);
@@ -311,12 +315,15 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     function draw() {
       var q = search.value.trim().toLowerCase();
       var want = filter.value;
+      var wantKeys = null;                 // 選了合併項時，符合其中任何一個狀態都算
+      GROUPS.forEach(function (g) { if ("group:" + g.slug === want) wantKeys = g.keys; });
       tbody.textContent = "";
       var shown = 0;
 
       books.forEach(function (b) {
         var st = POOP.stateOf(POOP.get(b, "status"));
-        if (want && st.label !== want) return;
+        if (wantKeys) { if (wantKeys.indexOf(st.label) === -1) return; }
+        else if (want && st.label !== want) return;
         if (q) {
           var hay = [POOP.get(b, "title"), POOP.get(b, "author"), POOP.get(b, "publisher")]
                       .join(" ").toLowerCase();
@@ -366,6 +373,9 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     function labelFromHash() {
       var slug = decodeURIComponent((location.hash || "").replace(/^#/, "")).trim().toLowerCase();
       if (!slug || slug === "all") return "";
+      for (var g = 0; g < GROUPS.length; g++) {
+        if (GROUPS[g].slug === slug || GROUPS[g].label === slug) return "group:" + GROUPS[g].slug;
+      }
       for (var i = 0; i < STATES.length; i++) {
         // 也接受直接寫中文狀態，例如 #已上架
         if (STATES[i].slug === slug || STATES[i].label === slug) return STATES[i].label;
@@ -384,6 +394,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     function writeHash() {
       var slug = "";
       STATES.forEach(function (s) { if (s.label === filter.value) slug = s.slug; });
+      GROUPS.forEach(function (g) { if ("group:" + g.slug === filter.value) slug = g.slug; });
       try {
         history.replaceState(null, "",
           location.pathname + location.search + (slug ? "#" + slug : ""));
