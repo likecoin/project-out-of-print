@@ -26,11 +26,40 @@
   // 顯示次序與顏色；未認得的狀態照原文顯示，不會被靜默歸類。
   // slug 供 progress.html 的網址片段使用，例如 progress.html#released 直接篩出已上架。
   var STATES = [
-    { key: "已上架",     label: "已上架",  slug: "released",    color: "#50e3c2" },
-    { key: "取得作者授權", label: "已獲授權", slug: "licensed",    color: "#0a7059" },
-    { key: "聯絡作者",    label: "聯絡中",  slug: "contacting",  color: "#c89a3c" },
-    { key: "",          label: "未開始",  slug: "not-started", color: "#b8a894" }
+    { key: "已上架",      label: "已上架",     slug: "released",            color: "#50e3c2" },
+    { key: "均已授權",    label: "均已授權",   slug: "both-licensed",       color: "#0a7059" },
+    { key: "作者已授權",  label: "作者已授權", slug: "author-licensed",     color: "#2f9c82" },
+    { key: "出版社已授權", label: "出版社已授權", slug: "publisher-licensed", color: "#6fb5a3" },
+    { key: "已有書",      label: "已有書",     slug: "in-hand",             color: "#c89a3c" },
+    { key: "已終止",      label: "已終止",     slug: "ended",               color: "#9c8f83" },
+    { key: "",           label: "未開始",     slug: "not-started",         color: "#b8a894" }
   ];
+
+  // 三種授權在首頁合成一個數字，進度頁才分開；#licensed 這條舊連結因此仍然有效。
+  var GROUPS = [
+    { label: "已獲授權", slug: "licensed",
+      keys: ["均已授權", "作者已授權", "出版社已授權"], color: "#0a7059" }
+  ];
+
+  // 首頁只放這幾個頭條數字，順序即顯示次序；完整七種狀態在進度頁。
+  var BRIEF = ["已上架", "已獲授權", "未開始"];
+
+  function briefTiles(books) {
+    var c = counts(books);
+    return BRIEF.map(function (name) {
+      var g = null;
+      GROUPS.forEach(function (x) { if (x.label === name) g = x; });
+      if (g) {
+        var n = 0;
+        g.keys.forEach(function (k) { n += c[k] || 0; });
+        return { label: g.label, n: n, color: g.color, slug: g.slug };
+      }
+      var st = null;
+      STATES.forEach(function (x) { if (x.label === name) st = x; });
+      return st ? { label: st.label, n: c[st.label] || 0, color: st.color, slug: st.slug }
+                : { label: name, n: 0, color: "#b8a894", slug: "" };
+    });
+  }
 
   // 按背景相對亮度選黑或白，日後在試算表新增狀態色仍可讀。
   function readableOn(hex) {
@@ -185,6 +214,8 @@
 
   global.POOP = {
     STATES: STATES,
+    GROUPS: GROUPS,
+    briefTiles: briefTiles,
     stateOf: stateOf,
     readableOn: readableOn,
     get: get,

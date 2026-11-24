@@ -283,7 +283,6 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
         <a class="brief-tile" href="progress.html"><div class="n">—</div><div class="k">書目總數</div></a>
         <a class="brief-tile" href="progress.html#released"><div class="n">—</div><div class="k">已上架</div></a>
         <a class="brief-tile" href="progress.html#licensed"><div class="n">—</div><div class="k">已獲授權</div></a>
-        <a class="brief-tile" href="progress.html#contacting"><div class="n">—</div><div class="k">聯絡中</div></a>
         <a class="brief-tile" href="progress.html#not-started"><div class="n">—</div><div class="k">未開始</div></a>
       </div>
       <a class="brief-more" href="progress.html">完整書目與進度 →</a>
@@ -521,7 +520,8 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
   </div>
 </footer>
 
-<script src="books.js"></script>
+<!-- 版本號：books.js 有改動時一併加一，免得新頁面配到瀏覽器快取裡的舊 script。 -->
+<script src="books.js?v=3"></script>
 <script>
 // 首頁只顯示數字；讀不到資料時整節維持隱藏，首頁不會出現錯誤訊息。
 (function () {
@@ -556,8 +556,14 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     }
     host.textContent = "";                       // 清走佔位磚
     tile(res.books.length, "書目總數", null, "progress.html");
-    POOP.STATES.forEach(function (s) {
-      tile(counts[s.label] || 0, s.label, s.color, "progress.html#" + s.slug);
+    // 首頁只放頭條數字（三種授權合成一個）；完整七種狀態在進度頁。
+    var tiles = POOP.briefTiles ? POOP.briefTiles(res.books)
+              : POOP.STATES.map(function (s) {       // 配到舊版 books.js 時的退路
+                  return { n: counts[s.label] || 0, label: s.label, color: s.color, slug: s.slug };
+                });
+    tiles.forEach(function (t) {
+      // slug 來自 books.js；萬一配到沒有 slug 的舊版，寧可連去整頁書目也不要 #undefined。
+      tile(t.n, t.label, t.color, "progress.html" + (t.slug ? "#" + t.slug : ""));
     });
     host.removeAttribute("aria-busy");
   });
