@@ -213,7 +213,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 </footer>
 
 <!-- 版本號：books.js 有改動時一併加一，免得新頁面配到瀏覽器快取裡的舊 script。 -->
-<script src="books.js?v=7"></script>
+<script src="books.js?v=8"></script>
 <script>
 (function () {
   "use strict";
@@ -264,7 +264,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     });
     host.appendChild(rest);
 
-    // 進度條分三段；未開始那部分不着色，露出底色就是還未動過的書。
+    // 進度條分三段；待認領那部分不着色，露出底色就是還未有人接手的書。
     var groups = POOP.summary(books);
     var meter = el("div", "meter");
     groups.forEach(function (g) {

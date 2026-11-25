@@ -31,7 +31,7 @@
     { key: "已授權、缺文本", label: "已授權、缺文本", slug: "need-text",    color: "#2f9c82" },
     { key: "有文本、缺授權", label: "有文本、缺授權", slug: "need-licence", color: "#c89a3c" },
     { key: "已終止",        label: "已終止",        slug: "ended",        color: "#9c8f83" },
-    { key: "",             label: "未開始",        slug: "not-started",  color: "#b8a894" }
+    { key: "",             label: "待義工認領",     slug: "not-started",  color: "#b8a894" }
   ];
 
   // 授權到手的兩種狀態合成一項，供進度頁的合併篩選用；#licensed 這條舊連結因此仍然有效。
@@ -41,16 +41,9 @@
   ];
 
   // 首頁只放這幾個頭條數字，順序即顯示次序；完整狀態在進度頁。
-  // as 是首頁上的說法：首頁要招募義工，「未開始」說成「待義工認領」，
-  // 試算表與進度頁的狀態名不受影響。
-  var BRIEF = [
-    { name: "已上架" },
-    { name: "已授權、缺文本" },
-    { name: "有文本、缺授權" },
-    { name: "未開始", as: "待義工認領" }
-  ];
+  var BRIEF = ["已上架", "已授權、缺文本", "有文本、缺授權", "待義工認領"];
 
-  // 進度頁上方的概覽只分三段：已上架、重生中、已終止。未開始那部分不着色，
+  // 進度頁上方的概覽只分三段：已上架、重生中、已終止。待認領那部分不着色，
   // 就是進度條未填滿的地方，所以三段加起來不等於總數是刻意的。
   var SUMMARY = [
     { label: "已上架", keys: ["已上架"], color: "#50e3c2" },
@@ -69,19 +62,18 @@
 
   function briefTiles(books) {
     var c = counts(books);
-    return BRIEF.map(function (item) {
-      var name = item.name, shown = item.as || item.name;
+    return BRIEF.map(function (name) {
       var g = null;
       GROUPS.forEach(function (x) { if (x.label === name) g = x; });
       if (g) {
         var n = 0;
         g.keys.forEach(function (k) { n += c[k] || 0; });
-        return { label: shown, n: n, color: g.color, slug: g.slug };
+        return { label: g.label, n: n, color: g.color, slug: g.slug };
       }
       var st = null;
       STATES.forEach(function (x) { if (x.label === name) st = x; });
-      return st ? { label: shown, n: c[st.label] || 0, color: st.color, slug: st.slug }
-                : { label: shown, n: 0, color: "#b8a894", slug: "" };
+      return st ? { label: st.label, n: c[st.label] || 0, color: st.color, slug: st.slug }
+                : { label: name, n: 0, color: "#b8a894", slug: "" };
     });
   }
 
