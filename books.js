@@ -26,24 +26,22 @@
   // 顯示次序與顏色；未認得的狀態照原文顯示，不會被靜默歸類。
   // slug 供 progress.html 的網址片段使用，例如 progress.html#released 直接篩出已上架。
   var STATES = [
-    { key: "已上架",      label: "已上架",     slug: "released",            color: "#50e3c2" },
-    { key: "均已授權",    label: "均已授權",   slug: "both-licensed",       color: "#0a7059" },
-    { key: "作者已授權",  label: "作者已授權", slug: "author-licensed",     color: "#2f9c82" },
-    { key: "出版社已授權", label: "出版社已授權", slug: "publisher-licensed", color: "#6fb5a3" },
-    { key: "已有書",      label: "已有書",     slug: "in-hand",             color: "#c89a3c" },
-    { key: "已終止",      label: "已終止",     slug: "ended",               color: "#9c8f83" },
-    { key: "",           label: "未開始",     slug: "not-started",         color: "#b8a894" }
+    { key: "已上架",        label: "已上架",        slug: "released",     color: "#50e3c2" },
+    { key: "製作中",        label: "製作中",        slug: "producing",    color: "#0a7059" },
+    { key: "已授權、缺文本", label: "已授權、缺文本", slug: "need-text",    color: "#2f9c82" },
+    { key: "有文本、缺授權", label: "有文本、缺授權", slug: "need-licence", color: "#c89a3c" },
+    { key: "已終止",        label: "已終止",        slug: "ended",        color: "#9c8f83" },
+    { key: "",             label: "未開始",        slug: "not-started",  color: "#b8a894" }
   ];
 
-  // 「已獲授權」只算作者點了頭的。出版社授權而作者未授權，書仍然做不成，
-  // 所以出版社已授權在首頁自成一項，不併入已獲授權。
+  // 授權到手的兩種狀態合成一項，供進度頁的合併篩選用；#licensed 這條舊連結因此仍然有效。
   var GROUPS = [
     { label: "已獲授權", slug: "licensed",
-      keys: ["均已授權", "作者已授權"], color: "#0a7059" }
+      keys: ["製作中", "已授權、缺文本"], color: "#0a7059" }
   ];
 
-  // 首頁只放這幾個頭條數字，順序即顯示次序；完整七種狀態在進度頁。
-  var BRIEF = ["已上架", "已獲授權", "出版社已授權", "未開始"];
+  // 首頁只放這幾個頭條數字，順序即顯示次序；完整六種狀態在進度頁。
+  var BRIEF = ["已上架", "製作中", "已授權、缺文本", "有文本、缺授權", "未開始"];
 
   function briefTiles(books) {
     var c = counts(books);
