@@ -41,7 +41,24 @@
   ];
 
   // 首頁只放這幾個頭條數字，順序即顯示次序；完整六種狀態在進度頁。
-  var BRIEF = ["已上架", "製作中", "已授權、缺文本", "有文本、缺授權", "未開始"];
+  var BRIEF = ["已上架", "已授權、缺文本", "有文本、缺授權", "未開始"];
+
+  // 進度頁上方的概覽只分三段：已上架、重生中、已終止。未開始那部分不着色，
+  // 就是進度條未填滿的地方，所以三段加起來不等於總數是刻意的。
+  var SUMMARY = [
+    { label: "已上架", keys: ["已上架"], color: "#50e3c2" },
+    { label: "重生中", keys: ["製作中", "已授權、缺文本", "有文本、缺授權"], color: "#0a7059" },
+    { label: "已終止", keys: ["已終止"], color: "#9c8f83" }
+  ];
+
+  function summary(books) {
+    var c = counts(books);
+    return SUMMARY.map(function (g) {
+      var n = 0;
+      g.keys.forEach(function (k) { n += c[k] || 0; });
+      return { label: g.label, n: n, color: g.color };
+    });
+  }
 
   function briefTiles(books) {
     var c = counts(books);
@@ -213,6 +230,7 @@
 
   global.POOP = {
     STATES: STATES,
+    summary: summary,
     GROUPS: GROUPS,
     briefTiles: briefTiles,
     stateOf: stateOf,
