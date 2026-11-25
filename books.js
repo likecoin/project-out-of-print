@@ -40,8 +40,15 @@
       keys: ["製作中", "已授權、缺文本"], color: "#0a7059" }
   ];
 
-  // 首頁只放這幾個頭條數字，順序即顯示次序；完整六種狀態在進度頁。
-  var BRIEF = ["已上架", "已授權、缺文本", "有文本、缺授權", "未開始"];
+  // 首頁只放這幾個頭條數字，順序即顯示次序；完整狀態在進度頁。
+  // as 是首頁上的說法：首頁要招募義工，「未開始」說成「待義工認領」，
+  // 試算表與進度頁的狀態名不受影響。
+  var BRIEF = [
+    { name: "已上架" },
+    { name: "已授權、缺文本" },
+    { name: "有文本、缺授權" },
+    { name: "未開始", as: "待義工認領" }
+  ];
 
   // 進度頁上方的概覽只分三段：已上架、重生中、已終止。未開始那部分不着色，
   // 就是進度條未填滿的地方，所以三段加起來不等於總數是刻意的。
@@ -62,18 +69,19 @@
 
   function briefTiles(books) {
     var c = counts(books);
-    return BRIEF.map(function (name) {
+    return BRIEF.map(function (item) {
+      var name = item.name, shown = item.as || item.name;
       var g = null;
       GROUPS.forEach(function (x) { if (x.label === name) g = x; });
       if (g) {
         var n = 0;
         g.keys.forEach(function (k) { n += c[k] || 0; });
-        return { label: g.label, n: n, color: g.color, slug: g.slug };
+        return { label: shown, n: n, color: g.color, slug: g.slug };
       }
       var st = null;
       STATES.forEach(function (x) { if (x.label === name) st = x; });
-      return st ? { label: st.label, n: c[st.label] || 0, color: st.color, slug: st.slug }
-                : { label: name, n: 0, color: "#b8a894", slug: "" };
+      return st ? { label: shown, n: c[st.label] || 0, color: st.color, slug: st.slug }
+                : { label: shown, n: 0, color: "#b8a894", slug: "" };
     });
   }
 
