@@ -79,6 +79,10 @@ section{padding:48px 0}
 
 /* summary tiles */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px}
+.tiles + .tiles{margin-top:14px}
+.tiles + .tiles .tile{padding:14px 16px}
+.tiles + .tiles .tile .n{font-size:27px}
+.tiles + .tiles .tile .k{font-size:13px}
 .tile{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow)}
 .tile .n{font-family:var(--serif);font-size:34px;font-weight:900;color:var(--ink);line-height:1.2}
 .tile .k{margin-top:2px;font-size:14px;color:var(--ink-3)}
@@ -209,7 +213,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 </footer>
 
 <!-- 版本號：books.js 有改動時一併加一，免得新頁面配到瀏覽器快取裡的舊 script。 -->
-<script src="books.js?v=6"></script>
+<script src="books.js?v=8"></script>
 <script>
 (function () {
   "use strict";
@@ -240,11 +244,27 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
       t.appendChild(k);
       tiles.appendChild(t);
     }
-    tile(counts["已上架"] || 0, "已完成", "#50e3c2");
+    var done = counts["已上架"] || 0;
+    var pct = books.length ? Math.round(done / books.length * 100) : 0;
+    tile(done, "已完成（" + pct + "%）", "#50e3c2");
     tile(books.length, "書目總數", null);
     host.appendChild(tiles);
 
-    // 進度條分三段；未開始那部分不着色，露出底色就是還未動過的書。
+    // 第二行把未完成的狀態逐項列出，首行那兩個數字才看得出是由什麼組成。
+    var rest = el("div", "tiles");
+    STATES.forEach(function (s) {
+      if (s.label === "已上架") return;
+      var t = el("div", "tile");
+      t.appendChild(el("div", "n", String(counts[s.label] || 0)));
+      var k = el("div", "k");
+      var dot = el("b"); dot.style.background = s.color;
+      k.appendChild(dot); k.appendChild(document.createTextNode(s.label));
+      t.appendChild(k);
+      rest.appendChild(t);
+    });
+    host.appendChild(rest);
+
+    // 進度條分三段；待認領那部分不着色，露出底色就是還未有人接手的書。
     var groups = POOP.summary(books);
     var meter = el("div", "meter");
     groups.forEach(function (g) {
