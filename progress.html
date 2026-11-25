@@ -209,7 +209,7 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
 </footer>
 
 <!-- 版本號：books.js 有改動時一併加一，免得新頁面配到瀏覽器快取裡的舊 script。 -->
-<script src="books.js?v=5"></script>
+<script src="books.js?v=6"></script>
 <script>
 (function () {
   "use strict";
@@ -229,41 +229,40 @@ footer .mark{font-family:var(--serif);font-size:16px;font-weight:700;color:var(-
     host.textContent = "";
     var counts = POOP.counts(books);
 
+    // 首行只放兩個數字：做完了多少，一共多少。
     var tiles = el("div", "tiles");
-    var total = el("div", "tile");
-    total.appendChild(el("div", "n", String(books.length)));
-    total.appendChild(el("div", "k", "書目總數"));
-    tiles.appendChild(total);
-
-    STATES.forEach(function (s) {
+    function tile(n, label, color) {
       var t = el("div", "tile");
-      t.appendChild(el("div", "n", String(counts[s.label] || 0)));
+      t.appendChild(el("div", "n", String(n)));
       var k = el("div", "k");
-      var dot = el("b"); dot.style.background = s.color;
-      k.appendChild(dot); k.appendChild(document.createTextNode(s.label));
+      if (color) { var dot = el("b"); dot.style.background = color; k.appendChild(dot); }
+      k.appendChild(document.createTextNode(label));
       t.appendChild(k);
       tiles.appendChild(t);
-    });
+    }
+    tile(counts["已上架"] || 0, "已完成", "#50e3c2");
+    tile(books.length, "書目總數", null);
     host.appendChild(tiles);
 
+    // 進度條分三段；未開始那部分不着色，露出底色就是還未動過的書。
+    var groups = POOP.summary(books);
     var meter = el("div", "meter");
-    STATES.forEach(function (s) {
-      var n = counts[s.label] || 0;
-      if (!n) return;
+    groups.forEach(function (g) {
+      if (!g.n) return;
       var seg = el("span");
-      seg.style.width = (n / books.length * 100) + "%";
-      seg.style.background = s.color;
-      seg.title = s.label + " " + n + " 本";
+      seg.style.width = (g.n / books.length * 100) + "%";
+      seg.style.background = g.color;
+      seg.title = g.label + " " + g.n + " 本";
       meter.appendChild(seg);
     });
     host.appendChild(meter);
 
     var legend = el("div", "legend");
-    STATES.forEach(function (s) {
+    groups.forEach(function (g) {
       var span = el("span");
-      var i2 = el("i"); i2.style.background = s.color;
+      var i2 = el("i"); i2.style.background = g.color;
       span.appendChild(i2);
-      span.appendChild(document.createTextNode(s.label + "　" + (counts[s.label] || 0) + " 本"));
+      span.appendChild(document.createTextNode(g.label + "　" + g.n + " 本"));
       legend.appendChild(span);
     });
     host.appendChild(legend);
