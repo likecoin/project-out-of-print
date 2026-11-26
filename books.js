@@ -26,18 +26,18 @@
   // 顯示次序與顏色；未認得的狀態照原文顯示，不會被靜默歸類。
   // slug 供 progress.html 的網址片段使用，例如 progress.html#released 直接篩出已上架。
   var STATES = [
-    { key: "已上架",        label: "已上架",        slug: "released",     color: "#50e3c2" },
-    { key: "製作中",        label: "製作中",        slug: "producing",    color: "#0a7059" },
-    { key: "已授權、缺文本", label: "已授權、缺文本", slug: "need-text",    color: "#2f9c82" },
-    { key: "有文本、缺授權", label: "有文本、缺授權", slug: "need-licence", color: "#c89a3c" },
-    { key: "已終止",        label: "已終止",        slug: "ended",        color: "#9c8f83" },
-    { key: "",             label: "待義工認領",     slug: "not-started",  color: "#b8a894" }
+    { key: "已上架",        label: "已上架",        slug: "released",     color: "#8fa37e" },
+    { key: "製作中",        label: "製作中",        slug: "producing",    color: "#56664c" },
+    { key: "已授權、缺文本", label: "已授權、缺文本", slug: "need-text",    color: "#bccaae" },
+    { key: "有文本、缺授權", label: "有文本、缺授權", slug: "need-licence", color: "#c19a6b" },
+    { key: "已終止",        label: "已終止",        slug: "ended",        color: "#9d9382" },
+    { key: "",             label: "待義工認領",     slug: "not-started",  color: "#d6ccbb" }
   ];
 
   // 授權到手的兩種狀態合成一項，供進度頁的合併篩選用；#licensed 這條舊連結因此仍然有效。
   var GROUPS = [
     { label: "已獲授權", slug: "licensed",
-      keys: ["製作中", "已授權、缺文本"], color: "#0a7059" }
+      keys: ["製作中", "已授權、缺文本"], color: "#56664c" }
   ];
 
   // 首頁只放這幾個頭條數字，順序即顯示次序；完整狀態在進度頁。
@@ -46,9 +46,9 @@
   // 進度頁上方的概覽只分三段：已上架、重生中、已終止。待認領那部分不着色，
   // 就是進度條未填滿的地方，所以三段加起來不等於總數是刻意的。
   var SUMMARY = [
-    { label: "已上架", keys: ["已上架"], color: "#50e3c2" },
-    { label: "重生中", keys: ["製作中", "已授權、缺文本", "有文本、缺授權"], color: "#0a7059" },
-    { label: "已終止", keys: ["已終止"], color: "#9c8f83" }
+    { label: "已上架", keys: ["已上架"], color: "#8fa37e" },
+    { label: "重生中", keys: ["製作中", "已授權、缺文本", "有文本、缺授權"], color: "#56664c" },
+    { label: "已終止", keys: ["已終止"], color: "#9d9382" }
   ];
 
   function summary(books) {
@@ -73,21 +73,21 @@
       var st = null;
       STATES.forEach(function (x) { if (x.label === name) st = x; });
       return st ? { label: st.label, n: c[st.label] || 0, color: st.color, slug: st.slug }
-                : { label: name, n: 0, color: "#b8a894", slug: "" };
+                : { label: name, n: 0, color: "#d6ccbb", slug: "" };
     });
   }
 
   // 按背景相對亮度選黑或白，日後在試算表新增狀態色仍可讀。
   function readableOn(hex) {
     var m = /^#?([0-9a-f]{6})$/i.exec(hex);
-    if (!m) return "#06241e";
+    if (!m) return "#26301f";
     var v = parseInt(m[1], 16);
     var ch = [(v >> 16) & 255, (v >> 8) & 255, v & 255].map(function (c) {
       c = c / 255;
       return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
     });
     var L = 0.2126 * ch[0] + 0.7152 * ch[1] + 0.0722 * ch[2];
-    return (1.05 / (L + 0.05)) >= ((L + 0.05) / 0.0598) ? "#ffffff" : "#06241e";
+    return (1.05 / (L + 0.05)) >= ((L + 0.05) / 0.0598) ? "#ffffff" : "#26301f";
   }
 
   function stateOf(raw) {
